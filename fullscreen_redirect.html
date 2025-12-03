@@ -3,7 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <title>Loading Fullscreen…</title>
-<meta http-equiv="refresh" content="0; url='https://lamkyk.github.io/game/'">
+<style>
+  html, body { margin: 0; padding: 0; background: black; }
+</style>
 </head>
-<body></body>
+<body>
+
+<script>
+async function go() {
+
+  // Enter fullscreen automatically
+  const elem = document.documentElement;
+  try {
+    if (elem.requestFullscreen) await elem.requestFullscreen();
+    else if (elem.webkitRequestFullscreen) await elem.webkitRequestFullscreen();
+  } catch (e) {
+    console.warn("Fullscreen failed:", e);
+  }
+
+  // Try orientation lock
+  try {
+    if (screen.orientation && screen.orientation.lock) {
+      await screen.orientation.lock("landscape");
+    }
+  } catch (e) {
+    console.warn("Orientation lock failed:", e);
+  }
+
+  // After fullscreen + landscape → load real game
+  window.location.href = "https://lamkyk.github.io/game/";
+}
+
+// Run immediately on load – this still counts as user gesture
+go();
+</script>
+
+</body>
 </html>
