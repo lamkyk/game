@@ -747,53 +747,62 @@
     }
     window.addEventListener("resize", resizeArena);
 
-/* Fullscreen toggle */
+/* Fullscreen toggle (Google Sites + standalone) */
 let isFS = false;
 
-function toggleFullscreen() {
-  const root = document.body;
+function inIframe() {
+  try {
+    return window.self !== window.top;
+  } catch (e) {
+    return true;
+  }
+}
 
-  if (!isFS) {
-    // ENTER PSEUDO-FULLSCREEN: Scales the game to fit the viewport
-    const scale = Math.min(
-      window.innerWidth / root.scrollWidth,
-      window.innerHeight / root.scrollHeight
-    );
-    root.style.transform = `scale(${scale})`;
-    root.style.transformOrigin = "top left";
-    root.style.width = root.scrollWidth + "px";
-    root.style.height = root.scrollHeight + "px";
-    root.style.position = "fixed";
-    root.style.left = "0";
-    root.style.top = "0";
-    root.style.background = "black";
-    isFS = true;
-  } else {
-    // EXIT PSEUDO-FULLSCREEN: Remove scaling
-    root.style.transform = "";
-    root.style.transformOrigin = "";
-    root.style.width = "";
-    root.style.height = "";
-    root.style.position = "";
-    root.style.left = "";
-    root.style.top = "";
-    root.style.background = "";
-    isFS = false;
+async function toggleFullscreen() {
+  // If we are embedded (e.g., inside Google Sites), open in a new tab instead
+  if (inIframe()) {
+    // This will open the game on its own page, which will naturally fill the tab on mobile
+    window.open(window.location.href, "_blank");
+    return;
   }
 
-  // Call resizeArena() if it's defined elsewhere in your code
-  if (typeof resizeArena === 'function') {
-      resizeArena();
-      setTimeout(resizeArena, 200);
-      setTimeout(resizeArena, 500);
+  // Standalone: use the Fullscreen API
+  const doc = document;
+  const elem = doc.documentElement || doc.body;
+
+  try {
+    if (!doc.fullscreenElement && !doc.webkitFullscreenElement) {
+      if (elem.requestFullscreen) {
+        await elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen(); // iOS Safari
+      }
+      isFS = true;
+    } else {
+      if (doc.exitFullscreen) {
+        await doc.exitFullscreen();
+      } else if (doc.webkitExitFullscreen) {
+        doc.webkitExitFullscreen();
+      }
+      isFS = false;
+    }
+  } catch (e) {
+    // If fullscreen is blocked, do nothing (button simply has no effect)
+    console.warn("Fullscreen request failed:", e);
+  }
+
+  if (typeof resizeArena === "function") {
+    resizeArena();
+    setTimeout(resizeArena, 200);
+    setTimeout(resizeArena, 500);
   }
 }
 
 // Attach the toggle function to the button
-if (typeof fullscreenBtn !== 'undefined' && fullscreenBtn) {
+if (fullscreenBtn) {
   fullscreenBtn.addEventListener("click", toggleFullscreen);
 }
-    
+
     /* Commentary */
     function logMessage(msg) {
       uiBottomLog.textContent = msg;
