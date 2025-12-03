@@ -776,10 +776,6 @@ function toggleFullscreen() {
         }
     }
 
-document.addEventListener('fullscreenchange', resizeArena);
-document.addEventListener('webkitfullscreenchange', resizeArena);
-document.addEventListener('mozfullscreenchange', resizeArena);
-document.addEventListener('msfullscreenchange', resizeArena);
     
     // Call resize when toggling to ensure the canvas adjusts immediately
     resizeArena();
@@ -791,6 +787,11 @@ if (fullscreenBtn) {
     fullscreenBtn.addEventListener("click", toggleFullscreen);
 }
 
+    document.addEventListener('fullscreenchange', resizeArena);
+document.addEventListener('webkitfullscreenchange', resizeArena);
+document.addEventListener('mozfullscreenchange', resizeArena);
+document.addEventListener('msfullscreenchange', resizeArena);
+    
     /* Commentary */
     function logMessage(msg) {
       uiBottomLog.textContent = msg;
