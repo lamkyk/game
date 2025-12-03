@@ -747,61 +747,66 @@
     }
     window.addEventListener("resize", resizeArena);
 
-/* Fullscreen toggle (Google Sites + standalone) */
+/* Fullscreen toggle */
+/* Smart behavior:
+   - If embedded inside Google Sites -> open real game in new tab
+   - If standalone (normal URL) -> use in-page fullscreen scaling
+*/
+
 let isFS = false;
 
-function inIframe() {
-  try {
-    return window.self !== window.top;
-  } catch (e) {
-    return true;
-  }
+function isEmbeddedInGoogleSites() {
+  return window.location !== window.parent.location &&
+         document.referrer.includes("google.com");
 }
 
-async function toggleFullscreen() {
-  // If we are embedded (e.g., inside Google Sites), open in a new tab instead
-  if (inIframe()) {
-    // This will open the game on its own page, which will naturally fill the tab on mobile
-    window.open(window.location.href, "_blank");
+function toggleFullscreen() {
+  // If inside Google Sites iframe: open real full game
+  if (isEmbeddedInGoogleSites()) {
+    window.open("https://lamkyk.github.io/game/", "_blank");
     return;
   }
 
-  // Standalone: use the Fullscreen API
-  const doc = document;
-  const elem = doc.documentElement || doc.body;
-
-  try {
-    if (!doc.fullscreenElement && !doc.webkitFullscreenElement) {
-      if (elem.requestFullscreen) {
-        await elem.requestFullscreen();
-      } else if (elem.webkitRequestFullscreen) {
-        elem.webkitRequestFullscreen(); // iOS Safari
-      }
-      isFS = true;
-    } else {
-      if (doc.exitFullscreen) {
-        await doc.exitFullscreen();
-      } else if (doc.webkitExitFullscreen) {
-        doc.webkitExitFullscreen();
-      }
-      isFS = false;
-    }
-  } catch (e) {
-    // If fullscreen is blocked, do nothing (button simply has no effect)
-    console.warn("Fullscreen request failed:", e);
+  // Otherwise: run your normal pseudo-fullscreen
+  const root = document.body;
+  if (!isFS) {
+    const scale = Math.min(
+      window.innerWidth / root.scrollWidth,
+      window.innerHeight / root.scrollHeight
+    );
+    root.style.transform = `scale(${scale})`;
+    root.style.transformOrigin = "top left";
+    root.style.width = root.scrollWidth + "px";
+    root.style.height = root.scrollHeight + "px";
+    root.style.position = "fixed";
+    root.style.left = "0";
+    root.style.top = "0";
+    root.style.background = "black";
+    isFS = true;
+  } else {
+    root.style.transform = "";
+    root.style.transformOrigin = "";
+    root.style.width = "";
+    root.style.height = "";
+    root.style.position = "";
+    root.style.left = "";
+    root.style.top = "";
+    root.style.background = "";
+    isFS = false;
   }
 
-  if (typeof resizeArena === "function") {
+  if (typeof resizeArena === 'function') {
     resizeArena();
     setTimeout(resizeArena, 200);
     setTimeout(resizeArena, 500);
   }
 }
 
-// Attach the toggle function to the button
+// Attach the toggle function
 if (fullscreenBtn) {
   fullscreenBtn.addEventListener("click", toggleFullscreen);
 }
+
 
     /* Commentary */
     function logMessage(msg) {
