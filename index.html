@@ -748,49 +748,51 @@
     window.addEventListener("resize", resizeArena);
 
 /* Fullscreen toggle */
+let isFS = false;
+
 function toggleFullscreen() {
-    const element = document.documentElement; // Request fullscreen on the whole <html> element
+  const root = document.body;
 
-    // Check if currently in fullscreen mode
-    if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
-        // EXIT FULLSCREEN
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) { /* Safari */
-            document.webkitExitFullscreen();
-        } else if (document.mozCancelFullScreen) { /* Firefox */
-            document.mozCancelFullScreen();
-        } else if (document.msExitFullscreen) { /* IE/Edge */
-            document.msExitFullscreen();
-        }
-    } else {
-        // ENTER FULLSCREEN
-        if (element.requestFullscreen) {
-            element.requestFullscreen();
-        } else if (element.webkitRequestFullscreen) { /* Safari */
-            element.webkitRequestFullscreen();
-        } else if (element.mozRequestFullScreen) { /* Firefox */
-            element.mozRequestFullScreen();
-        } else if (element.msRequestFullscreen) { /* IE/Edge */
-            element.msRequestFullscreen();
-        }
-    }
+  if (!isFS) {
+    // ENTER PSEUDO-FULLSCREEN: Scales the game to fit the viewport
+    const scale = Math.min(
+      window.innerWidth / root.scrollWidth,
+      window.innerHeight / root.scrollHeight
+    );
+    root.style.transform = `scale(${scale})`;
+    root.style.transformOrigin = "top left";
+    root.style.width = root.scrollWidth + "px";
+    root.style.height = root.scrollHeight + "px";
+    root.style.position = "fixed";
+    root.style.left = "0";
+    root.style.top = "0";
+    root.style.background = "black";
+    isFS = true;
+  } else {
+    // EXIT PSEUDO-FULLSCREEN: Remove scaling
+    root.style.transform = "";
+    root.style.transformOrigin = "";
+    root.style.width = "";
+    root.style.height = "";
+    root.style.position = "";
+    root.style.left = "";
+    root.style.top = "";
+    root.style.background = "";
+    isFS = false;
+  }
 
-    
-    // Call resize when toggling to ensure the canvas adjusts immediately
-    resizeArena();
-    setTimeout(resizeArena, 200);
-    setTimeout(resizeArena, 500);
+  // Call resizeArena() if it's defined elsewhere in your code
+  if (typeof resizeArena === 'function') {
+      resizeArena();
+      setTimeout(resizeArena, 200);
+      setTimeout(resizeArena, 500);
+  }
 }
 
-if (fullscreenBtn) {
-    fullscreenBtn.addEventListener("click", toggleFullscreen);
+// Attach the toggle function to the button
+if (typeof fullscreenBtn !== 'undefined' && fullscreenBtn) {
+  fullscreenBtn.addEventListener("click", toggleFullscreen);
 }
-
-    document.addEventListener('fullscreenchange', resizeArena);
-document.addEventListener('webkitfullscreenchange', resizeArena);
-document.addEventListener('mozfullscreenchange', resizeArena);
-document.addEventListener('msfullscreenchange', resizeArena);
     
     /* Commentary */
     function logMessage(msg) {
