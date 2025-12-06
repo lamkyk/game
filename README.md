@@ -25,4 +25,4 @@ Just open the file and throw down.
 
 You’ll lose in 60 seconds.  
 You’ll immediately hit “next round.”  
-That’s the point.
+Kid-friendly, quick and easy to play (but took much longer than expected to get minor issues fixed 😉).
